@@ -100,17 +100,18 @@
             overflow: hidden;
         }
         
-        /* This is where we'd link to an actual photo if we had one */
-        .avatar::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('theia.png') no-repeat center center, linear-gradient(120deg, rgba(70, 70, 120, 0.5), rgba(30, 30, 60, 0.9));
-            z-index: 3;
-        }
+.avatar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('theia.png') no-repeat center center, 
+                linear-gradient(120deg, rgba(70,70,120,0.5), rgba(30,30,60,0.9));
+    background-size: contain, cover;
+    z-index: 3;
+}
         
         /* Cat ear overlays */
         .avatar::after {

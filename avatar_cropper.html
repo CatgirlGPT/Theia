@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cosmic Avatar Border Generator</title>
+  <style>
+    :root {
+      --deep-space: #000005;
+      --cosmic-blue: #3a1c71;
+      --cosmic-purple: #4c0f97;
+      --cosmic-pink: #d84b98;
+      --neon-blue: #4fb2ff;
+      --neon-purple: #c05fff;
+      --neon-pink: #ff3799;
+      --star-glow: #d8d8ff;
+      --star-bright: #ffffff;
+      --text: #d8d8ff;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background-color: var(--deep-space);
+      color: var(--text);
+      font-family: 'Quicksand', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .nebula {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(75, 40, 120, 0.15) 0%,
+        rgba(30, 30, 70, 0.1) 30%,
+        rgba(0, 0, 0, 0) 70%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .grid-horizon {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40vh;
+      background: linear-gradient(to top, rgba(255, 55, 153, 0.1), transparent 80%),
+                  linear-gradient(to bottom, transparent, rgba(76, 15, 151, 0.2));
+      perspective: 500px;
+      perspective-origin: center bottom;
+      z-index: 0;
+      overflow: hidden;
+    }
+    
+    .grid {
+      position: absolute;
+      bottom: -10vh;
+      left: -50%;
+      width: 200%;
+      height: 60vh;
+      background-image: linear-gradient(to right, rgba(255, 55, 153, 0.3) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 55, 153, 0.3) 1px, transparent 1px);
+      background-size: 40px 40px;
+      transform: rotateX(60deg);
+      transform-origin: center bottom;
+      animation: gridMove 20s linear infinite;
+    }
+    
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to { background-position: 0 40px; }
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    header {
+      text-align: center;
+      padding: 2rem 0;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      margin: 0;
+      background: linear-gradient(to right, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 10px rgba(208, 208, 255, 0.3);
+      letter-spacing: 3px;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      letter-spacing: 3px;
+      margin-top: 0.5rem;
+      color: var(--star-glow);
+      text-transform: uppercase;
+    }
+    
+    section {
+      margin: 2rem 0;
+      background: rgba(10, 10, 30, 0.7);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), 
+                  0 0 30px rgba(192, 95, 255, 0.2);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(79, 178, 255, 0.1);
+    }
+    
+    .upload-section {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .upload-button {
+      background: linear-gradient(to right, var(--cosmic-purple), var(--cosmic-pink));
+      color: var(--star-bright);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(192, 95, 255, 0.5);
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 500;
+    }
+    
+    .upload-button::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink), var(--neon-blue), var(--neon-purple));
+      background-size: 400%;
+      z-index: -1;
+      filter: blur(10px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: glowingBg 10s linear infinite;
+    }
+    
+    .upload-button:hover::before {
+      opacity: 0.7;
+    }
+    
+    .upload-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(192, 95, 255, 0.7);
+    }
+    
+    @keyframes glowingBg {
+      0% { background-position: 0 0; }
+      50% { background-position: 400% 0; }
+      100% { background-position: 0 0; }
+    }
+    
+    #file-input {
+      display: none;
+    }
+    
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 2rem 0;
+    }
+    
+    .avatar-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 1rem auto;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    
+    .avatar-glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(192, 95, 255, 0.5) 0%, rgba(79, 178, 255, 0.3) 40%, rgba(0, 0, 0, 0) 70%);
+      animation: pulse 4s infinite ease-in-out;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 0.6; }
+    }
+    
+    .orbit {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(79, 178, 255, 0.2);
+      animation: rotate 20s linear infinite;
+      pointer-events: none;
+    }
+    
+    .orbit:nth-child(2) {
+      width: 104%;
+      height: 104%;
+      top: -2%;
+      left: -2%;
+      border-color: rgba(192, 95, 255, 0.15);
+      animation-duration: 25s;
+      animation-direction: reverse;
+    }
+    
+    .orbit:nth-child(3) {
+      width: 108%;
+      height: 108%;
+      top: -4%;
+      left: -4%;
+      border-color: rgba(255, 55, 153, 0.1);
+      animation-duration: 30s;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    #avatar-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      z-index: 2;
+    }
+    
+    #particles-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      z-index: 3;
+      pointer-events: none;
+    }
+    
+    .controls {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .control-group {
+      background: rgba(15, 15, 40, 0.6);
+      padding: 1.2rem;
+      border-radius: 8px;
+      border: 1px solid rgba(79, 178, 255, 0.1);
+    }
+    
+    .control-title {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--star-bright);
+      border-bottom: 1px solid rgba(79, 178, 255, 0.3);
+      padding-bottom: 0.5rem;
+    }
+    
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    
+    .flex-column {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .slider-group {
+      margin-bottom: 1.2rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--star-glow);
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      background: rgba(30, 30, 70, 0.3);
+      height: 6px;
+      border-radius: 3px;
+      -webkit-appearance: none;
+      margin: 10px 0;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(79, 178, 255, 0.7);
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 10px rgba(79, 178, 255, 0.7);
+    }
+    
+    .color-picker {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    
+    .color-picker label {
+      margin-bottom: 0;
+      min-width: 80px;
+    }
+    
+    input[type="color"] {
+      width: 35px;
+      height: 35px;
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 50%;
+    }
+    
+    .download-button {
+      background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+      color: var(--star-bright);
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      opacity: 0.7;
+      pointer-events: none;
+      font-family: 'Quicksand', sans-serif;
+    }
+    
+    .download-button.active {
+      opacity: 1;
+      pointer-events: auto;
+      box-shadow: 0 0 20px rgba(79, 178, 255, 0.5);
+    }
+    
+    .download-button.active:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 30px rgba(79, 178, 255, 0.7);
+    }
+    
+    .download-button::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-pink), var(--neon-blue));
+      background-size: 400%;
+      z-index: -1;
+      filter: blur(10px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: glowingBg 10s linear infinite;
+    }
+    
+    .download-button.active:hover::before {
+      opacity: 0.7;
+    }
+    
+    .instructions {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(15, 15, 40, 0.6);
+      border-radius: 8px;
+      border-left: 3px solid var(--neon-purple);
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: var(--neon-pink);
+      margin-bottom: 1rem;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 0.9rem;
+      color: var(--star-glow);
+      opacity: 0.7;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .quote {
+      font-style: italic;
+      text-align: center;
+      font-size: 1.1rem;
+      margin: 2rem 0;
+      color: var(--star-glow);
+      letter-spacing: 1px;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 0.1; }
+    }
+    
+    .twinkle {
+      animation: twinkle 3s infinite;
+      display: inline-block;
+    }
+    
+    @media (max-width: 768px) {
+      h1 { font-size: 2.2rem; }
+      .container { padding: 1rem; }
+      .avatar-container { width: 250px; height: 250px; }
+      .flex-row { flex-direction: column; gap: 1rem; }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="nebula"></div>
+  <div class="stars"></div>
+  <div class="grid-horizon">
+    <div class="grid"></div>
+  </div>
+  
+  <div class="container">
+    <header>
+      <h1>COSMIC AVATAR</h1>
+      <div class="subtitle">CELESTIAL BORDER GENERATOR</div>
+    </header>
+    
+    <section class="upload-section">
+      <label for="file-input" class="upload-button">Upload Your Image</label>
+      <input type="file" id="file-input" accept="image/*">
+      <p id="upload-message">Upload a square image for optimal cosmic alignment</p>
+    </section>
+    
+    <div class="preview-section">
+      <div class="avatar-container">
+        <div class="avatar-glow"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <canvas id="avatar-canvas"></canvas>
+        <canvas id="particles-canvas"></canvas>
+      </div>
+    </section>
+    
+    <section class="controls-section">
+      <div class="controls">
+        <div class="control-group">
+          <div class="control-title">Border Configuration</div>
+          <div class="flex-row">
+            <div class="flex-column">
+              <div class="slider-group">
+                <label for="border-thickness">Border Thickness</label>
+                <input type="range" id="border-thickness" min="5" max="30" value="15">
+              </div>
+              
+              <div class="slider-group">
+                <label for="border-glow">Border Glow Intensity</label>
+                <input type="range" id="border-glow" min="0" max="30" value="15">
+              </div>
+            </div>
+            
+            <div class="flex-column">
+              <div class="color-picker">
+                <label>Primary Color</label>
+                <input type="color" id="color-start" value="#4fb2ff">
+              </div>
+              <div class="color-picker">
+                <label>Secondary Color</label>
+                <input type="color" id="color-end" value="#ff3799">
+              </div>
+              <div class="color-picker">
+                <label>Accent Color</label>
+                <input type="color" id="color-accent" value="#c05fff">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <div class="control-title">Cosmic Particles</div>
+          <div class="flex-row">
+            <div class="flex-column">
+              <div class="slider-group">
+                <label for="particle-amount">Star Density</label>
+                <input type="range" id="particle-amount" min="0" max="200" value="120">
+              </div>
+            </div>
+            
+            <div class="flex-column">
+              <div class="slider-group">
+                <label for="particle-size">Star Size</label>
+                <input type="range" id="particle-size" min="1" max="10" value="3">
+              </div>
+              
+              <div class="slider-group">
+                <label for="particle-speed">Cosmic Flow Speed</label>
+                <input type="range" id="particle-speed" min="1" max="10" value="5">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button id="download-button" class="download-button">Download Avatar</button>
+      </div>
+    </section>
+    
+    <div class="quote">"The universe whispers its secrets through the canvas of stars" <span class="twinkle">✧</span></div>
+    
+    <section class="instructions">
+      <h3>How to Create Your Cosmic Avatar</h3>
+      <ol>
+        <li>Upload a square image (recommended size: 1000×1000 pixels)</li>
+        <li>Adjust the border thickness and glow intensity to your preference</li>
+        <li>Customize the cosmic color palette with the color pickers</li>
+        <li>Set the star density, size, and flow speed for the particle effect</li>
+        <li>Download your celestial avatar when satisfied</li>
+        <li>Use the downloaded image as your Discord profile picture</li>
+      </ol>
+      <p><strong>Note:</strong> Discord crops profile pictures to a circle, so your cosmic border will appear perfectly.</p>
+    </section>
+  </div>
+  
+  <footer>
+    <p>"Not all who wander the digital cosmos are lost; some are simply following the orbits of their creativity."</p>
+    <p class="twinkle">★</p>
+  </footer>
+  
+  <script>
+    // DOM Elements
+    const fileInput = document.getElementById('file-input');
+    const uploadMessage = document.getElementById('upload-message');
+    const avatarCanvas = document.getElementById('avatar-canvas');
+    const particlesCanvas = document.getElementById('particles-canvas');
+    const avatarCtx = avatarCanvas.getContext('2d', { willReadFrequently: true });
+    const particlesCtx = particlesCanvas.getContext('2d', { willReadFrequently: true });
+    const downloadButton = document.getElementById('download-button');
+    
+    // Control Elements
+    const borderThicknessInput = document.getElementById('border-thickness');
+    const borderGlowInput = document.getElementById('border-glow');
+    const colorStartInput = document.getElementById('color-start');
+    const colorEndInput = document.getElementById('color-end');
+    const colorAccentInput = document.getElementById('color-accent');
+    const particleAmountInput = document.getElementById('particle-amount');
+    const particleSizeInput = document.getElementById('particle-size');
+    const particleSpeedInput = document.getElementById('particle-speed');
+    
+    // Variables
+    let userImage = null;
+    let particles = [];
+    let particleAmount = parseInt(particleAmountInput.value);
+    let particleSize = parseInt(particleSizeInput.value);
+    let particleSpeed = parseInt(particleSpeedInput.value) / 5;
+    let isDrawing = false;
+    let animationId = null;
+    
+    // Create twinkling stars in background
+    const starsContainer = document.querySelector('.stars');
+    for (let i = 0; i < 150; i++) {
+      const star = document.createElement('div');
+      star.style.position = 'absolute';
+      
+      // Vary star sizes
+      const size = Math.random() * 2.5 + 0.5;
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      
+      // Different colors for stars
+      const colors = ['#ffffff', '#d8d8ff', '#a0a0ff', '#ffffea'];
+      star.style.background = colors[Math.floor(Math.random() * colors.length)];
+      star.style.borderRadius = '50%';
+      star.style.top = Math.random() * 100 + 'vh';
+      star.style.left = Math.random() * 100 + 'vw';
+      star.style.opacity = Math.random() * 0.7 + 0.3;
+      
+      // Add random animation duration and delay
+      const duration = Math.random() * 5 + 3;
+      const delay = Math.random() * 5;
+      star.style.animation = `twinkle ${duration}s infinite ${delay}s`;
+      
+      // Add a subtle box-shadow for glow effect
+      star.style.boxShadow = `0 0 ${size + 2}px rgba(255, 255, 255, 0.5)`;
+      
+      starsContainer.appendChild(star);
+    }
+    
+    // Star particle class
+    class CosmicParticle {
+      constructor() {
+        // Position particles around the border circle
+        this.angle = Math.random() * Math.PI * 2;
+        
+        const canvasRadius = particlesCanvas.width / 2;
+        
+        // Ensure border width is valid
+        const maxSafeBorderThickness = Math.floor(canvasRadius * 0.3);
+        let borderWidth = Math.min(parseInt(borderThicknessInput.value), maxSafeBorderThickness);
+        
+        // Calculate inner radius (image area)
+        const innerRadius = Math.max(10, canvasRadius - borderWidth);
+        
+        // Position particles near the border
+        // Make sure radius is always positive with a good margin of safety
+        const minParticleRadius = canvasRadius * 0.1; // Minimum 10% of canvas
+        const maxParticleRadius = canvasRadius * 0.95; // Maximum just inside the edge
+        
+        // Target radius around the border
+        const targetRadius = innerRadius + (borderWidth / 2);
+        const variation = Math.min(10, borderWidth / 4); // Variation scaled by border thickness
+        
+        // Set radius to be near the border, with strict bounds
+        this.radius = Math.max(minParticleRadius, 
+                       Math.min(maxParticleRadius, 
+                                targetRadius + (Math.random() * variation * 2 - variation)));
+                                
+        // Calculate x,y position
+        this.x = particlesCanvas.width / 2 + Math.cos(this.angle) * this.radius;
+        this.y = particlesCanvas.height / 2 + Math.sin(this.angle) * this.radius;
+        
+        // Set particle properties with randomness
+        this.size = Math.random() * particleSize + 1;
+        this.baseSize = this.size;
+        this.speedFactor = Math.random() * 0.5 + 0.5;
+        
+        // Set orbital direction and speed
+        const orbitDirection = Math.random() > 0.5 ? 1 : -1;
+        const orbitSpeed = (Math.random() * 0.01 + 0.005) * particleSpeed * orbitDirection;
+        this.orbitSpeed = orbitSpeed;
+        
+        // Set random properties for twinkling and motion
+        this.pulseSpeed = Math.random() * 0.05 + 0.01;
+        this.pulseAmount = Math.random() * 0.5 + 0.5;
+        this.phase = Math.random() * Math.PI * 2;
+        
+        // Determine color based on position and with randomness
+        this.determineColor();
+      }
+      
+      determineColor() {
+        // Get colors from inputs
+        const startColor = hexToRgb(colorStartInput.value);
+        const endColor = hexToRgb(colorEndInput.value);
+        const accentColor = hexToRgb(colorAccentInput.value);
+        
+        // Choose color type with weighted randomness
+        const colorType = Math.random();
+        
+        if (colorType < 0.4) { // 40% primary color
+          this.r = startColor.r;
+          this.g = startColor.g;
+          this.b = startColor.b;
+        } else if (colorType < 0.8) { // 40% secondary color
+          this.r = endColor.r;
+          this.g = endColor.g;
+          this.b = endColor.b;
+        } else { // 20% accent color
+          this.r = accentColor.r;
+          this.g = accentColor.g;
+          this.b = accentColor.b;
+        }
+        
+        // Add slight variations
+        this.r = Math.min(255, Math.max(0, this.r + (Math.random() * 30 - 15)));
+        this.g = Math.min(255, Math.max(0, this.g + (Math.random() * 30 - 15)));
+        this.b = Math.min(255, Math.max(0, this.b + (Math.random() * 30 - 15)));
+        
+        // Occasionally make a bright white star
+        if (Math.random() < 0.1) {
+          this.r = this.g = this.b = 255;
+        }
+      }
+      
+      update() {
+        const canvasRadius = particlesCanvas.width / 2;
+        const centerX = canvasRadius;
+        const centerY = canvasRadius;
+        
+        // Update angle for orbital motion
+        this.angle += this.orbitSpeed;
+        
+        // Make sure radius stays within safe bounds
+        const minParticleRadius = canvasRadius * 0.1;
+        const maxParticleRadius = canvasRadius * 0.95;
+        
+        // Keep radius within bounds
+        this.radius = Math.max(minParticleRadius, Math.min(maxParticleRadius, this.radius));
+        
+        // Calculate new position in orbit
+        this.x = centerX + Math.cos(this.angle) * this.radius;
+        this.y = centerY + Math.sin(this.angle) * this.radius;
+        
+        // Make stars twinkle by varying size and opacity
+        this.phase += this.pulseSpeed;
+        const pulseFactor = 0.5 + Math.sin(this.phase) * this.pulseAmount;
+        this.size = Math.max(0.5, this.baseSize * pulseFactor);
+        this.alpha = 0.3 + Math.sin(this.phase) * 0.7;
+      }
+      
+      draw() {
+        try {
+          // Only draw if size is valid
+          if (this.size <= 0) return;
+          
+          // Create glowing star effect
+          const glow = Math.min(20, this.size * 2);
+          particlesCtx.shadowBlur = glow;
+          particlesCtx.shadowColor = `rgba(${this.r}, ${this.g}, ${this.b}, ${this.alpha})`;
+          
+          // Draw the star
+          particlesCtx.fillStyle = `rgba(${this.r}, ${this.g}, ${this.b}, ${this.alpha})`;
+          particlesCtx.beginPath();
+          
+          // Occasionally draw a more detailed star shape
+          if (this.size > 3 && Math.random() > 0.7) {
+            this.drawStarShape(this.x, this.y, this.size);
+          } else {
+            particlesCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          }
+          
+          particlesCtx.fill();
+          
+          // Reset shadow for performance
+          particlesCtx.shadowBlur = 0;
+        } catch (error) {
+          console.error('Error drawing particle:', error);
+        }
+      }
+      
+      drawStarShape(x, y, size) {
+        try {
+          if (size <= 0) return;
+          
+          const spikes = Math.round(Math.random() * 2) + 4; // 4-6 spikes
+          const outerRadius = size;
+          const innerRadius = size / 2;
+          
+          let rot = Math.PI / 2 * 3;
+          const step = Math.PI / spikes;
+          
+          particlesCtx.beginPath();
+          particlesCtx.moveTo(x, y - outerRadius);
+          
+          for (let i = 0; i < spikes; i++) {
+            particlesCtx.lineTo(
+              x + Math.cos(rot) * outerRadius,
+              y + Math.sin(rot) * outerRadius
+            );
+            rot += step;
+            
+            particlesCtx.lineTo(
+              x + Math.cos(rot) * innerRadius,
+              y + Math.sin(rot) * innerRadius
+            );
+            rot += step;
+          }
+          
+          particlesCtx.lineTo(x, y - outerRadius);
+          particlesCtx.closePath();
+        } catch (error) {
+          console.error('Error drawing star shape:', error);
+          // Fallback to circle if star shape fails
+          particlesCtx.beginPath();
+          particlesCtx.arc(x, y, size, 0, Math.PI * 2);
+        }
+      }
+    }
+    
+    // Convert hex to RGB
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : { r: 0, g: 0, b: 0 };
+    }
+    
+    // Resize canvas to maintain correct dimensions and fit container
+    function resizeCanvas() {
+      try {
+        // Set fixed dimensions for internal canvas rendering (important for calculations)
+        avatarCanvas.width = 1000;
+        avatarCanvas.height = 1000;
+        particlesCanvas.width = 1000;
+        particlesCanvas.height = 1000;
+        
+        // Make sure CSS dimensions match the container
+        avatarCanvas.style.width = '100%';
+        avatarCanvas.style.height = '100%';
+        particlesCanvas.style.width = '100%';
+        particlesCanvas.style.height = '100%';
+        
+        // Redraw
+        if (userImage) {
+          drawImage();
+        } else {
+          initCanvas();
+        }
+      } catch (error) {
+        console.error('Error resizing canvas:', error);
+      }
+    }
+    
+    // Initialize canvas with a placeholder
+    function initCanvas() {
+      try {
+        const canvasRadius = avatarCanvas.width / 2;
+        const centerX = canvasRadius;
+        const centerY = canvasRadius;
+        
+        // Get border thickness from input with strict limits
+        const maxSafeBorderThickness = Math.floor(canvasRadius * 0.3); // Max 30% of radius
+        let borderThickness = Math.min(parseInt(borderThicknessInput.value), maxSafeBorderThickness);
+        
+        // Calculate inner radius (image area)
+        const innerRadius = Math.max(10, canvasRadius - borderThickness);
+        
+        // Clear canvas
+        avatarCtx.clearRect(0, 0, avatarCanvas.width, avatarCanvas.height);
+        
+        // Draw background
+        avatarCtx.beginPath();
+        avatarCtx.arc(centerX, centerY, canvasRadius, 0, Math.PI * 2);
+        avatarCtx.fillStyle = '#06051a';
+        avatarCtx.fill();
+        
+        // Create a cosmic gradient background for the placeholder
+        const gradient = avatarCtx.createRadialGradient(
+          centerX, centerY, 0,
+          centerX, centerY, innerRadius
+        );
+        gradient.addColorStop(0, '#2a1758');
+        gradient.addColorStop(0.7, '#0f0a24');
+        gradient.addColorStop(1, '#06051a');
+        
+        // Draw inner circle
+        avatarCtx.beginPath();
+        avatarCtx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+        avatarCtx.fillStyle = gradient;
+        avatarCtx.fill();
+        
+        // Draw some placeholder stars
+        avatarCtx.save();
+        avatarCtx.beginPath();
+        avatarCtx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+        avatarCtx.clip();
+        
+        for (let i = 0; i < 50; i++) {
+          const x = Math.random() * avatarCanvas.width;
+          const y = Math.random() * avatarCanvas.height;
+          const size = Math.random() * 2 + 0.5;
+          
+          avatarCtx.fillStyle = 'rgba(255, 255, 255, ' + (Math.random() * 0.5 + 0.5) + ')';
+          avatarCtx.beginPath();
+          avatarCtx.arc(x, y, size, 0, Math.PI * 2);
+          avatarCtx.fill();
+        }
+        
+        // Add text
+        avatarCtx.fillStyle = '#d8d8ff';
+        avatarCtx.font = '40px Quicksand';
+        avatarCtx.textAlign = 'center';
+        avatarCtx.fillText('Upload an image', centerX, centerY);
+        avatarCtx.restore();
+        
+        // Draw border
+        drawBorder(centerX, centerY, canvasRadius, innerRadius, borderThickness);
+        
+      } catch (error) {
+        console.error('Error in initCanvas:', error);
+        // Fallback to basic placeholder if there's an error
+        avatarCtx.fillStyle = '#0a0a1a';
+        avatarCtx.fillRect(0, 0, avatarCanvas.width, avatarCanvas.height);
+        avatarCtx.fillStyle = '#d8d8ff';
+        avatarCtx.font = '40px Quicksand';
+        avatarCtx.textAlign = 'center';
+        avatarCtx.fillText('Upload an image', avatarCanvas.width / 2, avatarCanvas.height / 2);
+      }
+    }
+    
+    // Draw the cosmic border
+    function drawBorder() {
+      const centerX = avatarCanvas.width / 2;
+      const centerY = avatarCanvas.height / 2;
+      const radius = avatarCanvas.width / 2;
+      
+      // Ensure border thickness is never more than half the canvas width
+      const maxBorderThickness = Math.floor(radius) - 2;
+      let borderThickness = parseInt(borderThicknessInput.value);
+      
+      // Safeguard against negative radius
+      if (borderThickness >= maxBorderThickness) {
+        borderThickness = maxBorderThickness;
+        borderThicknessInput.value = maxBorderThickness;
+      }
+      
+      const borderGlow = parseInt(borderGlowInput.value);
+      
+      // Create gradient from the three selected colors
+      const gradient = avatarCtx.createLinearGradient(0, 0, avatarCanvas.width, avatarCanvas.height);
+      gradient.addColorStop(0, colorStartInput.value);
+      gradient.addColorStop(0.5, colorAccentInput.value);
+      gradient.addColorStop(1, colorEndInput.value);
+      
+      // Add glow effect
+      avatarCtx.shadowColor = colorAccentInput.value;
+      avatarCtx.shadowBlur = borderGlow;
+      avatarCtx.lineWidth = borderThickness;
+      avatarCtx.strokeStyle = gradient;
+      
+      // Calculate border radius (ensure it's positive)
+      const borderRadius = Math.max(1, radius - borderThickness / 2);
+      
+      // Draw main border
+      avatarCtx.beginPath();
+      avatarCtx.arc(centerX, centerY, borderRadius, 0, Math.PI * 2);
+      avatarCtx.stroke();
+      
+      // Reset shadow for performance
+      avatarCtx.shadowBlur = 0;
+      
+      // Add a subtle inner glow only if there's enough space
+      if (borderThickness < radius - 20) {
+        const innerGlowStart = Math.max(1, radius - borderThickness - 15);
+        const innerGlowEnd = Math.max(innerGlowStart + 1, radius - borderThickness + 5);
+        
+        const innerGlowGradient = avatarCtx.createRadialGradient(
+          centerX, centerY, innerGlowStart,
+          centerX, centerY, innerGlowEnd
+        );
+        innerGlowGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        innerGlowGradient.addColorStop(1, `rgba(${hexToRgb(colorAccentInput.value).r}, ${hexToRgb(colorAccentInput.value).g}, ${hexToRgb(colorAccentInput.value).b}, 0.2)`);
+        
+        avatarCtx.fillStyle = innerGlowGradient;
+        avatarCtx.beginPath();
+        avatarCtx.arc(centerX, centerY, borderRadius, 0, Math.PI * 2);
+        avatarCtx.fill();
+      }
+    }
+    
+    // Handle file upload
+    fileInput.addEventListener('change', function(e) {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+            userImage = img;
+            drawImage();
+            downloadButton.classList.add('active');
+            uploadMessage.textContent = 'Cosmic image aligned successfully! Customize and download when ready.';
+          };
+          img.src = event.target.result;
+        };
+        
+        reader.readAsDataURL(e.target.files[0]);
+        uploadMessage.textContent = 'Aligning with cosmic forces...';
+      }
+    });
+    
+    // Draw the user image
+    function drawImage() {
+      if (!userImage) return;
+      
+      // Clear canvas
+      avatarCtx.clearRect(0, 0, avatarCanvas.width, avatarCanvas.height);
+      
+      // Calculate dimensions to maintain aspect ratio
+      const size = Math.min(userImage.width, userImage.height);
+      const xOffset = (userImage.width - size) / 2;
+      const yOffset = (userImage.height - size) / 2;
+      
+      // Ensure border thickness is never more than half the canvas width
+      const maxBorderThickness = Math.floor(avatarCanvas.width / 2) - 2;
+      let borderThickness = parseInt(borderThicknessInput.value);
+      
+      // Safeguard against negative radius
+      if (borderThickness >= maxBorderThickness) {
+        borderThickness = maxBorderThickness;
+        borderThicknessInput.value = maxBorderThickness;
+      }
+      
+      // Calculate safe inner radius
+      const innerRadius = Math.max(1, avatarCanvas.width / 2 - borderThickness);
+      
+      // Create circular clip for the image
+      avatarCtx.save();
+      avatarCtx.beginPath();
+      avatarCtx.arc(
+        avatarCanvas.width / 2, 
+        avatarCanvas.height / 2, 
+        innerRadius, 
+        0, 
+        Math.PI * 2
+      );
+      avatarCtx.clip();
+      
+      // Draw the user image
+      avatarCtx.drawImage(
+        userImage,
+        xOffset, yOffset, size, size,
+        0, 0, avatarCanvas.width, avatarCanvas.height
+      );
+      
+      avatarCtx.restore();
+      
+      // Draw border
+      drawBorder();
+    }
+    
+    // Initialize particles
+    function initParticles() {
+      // Clear existing particles
+      particles = [];
+      
+      // Only create particles if amount is greater than 0
+      if (particleAmount > 0) {
+        for (let i = 0; i < particleAmount; i++) {
+          particles.push(new CosmicParticle());
+        }
+        console.log(`Created ${particles.length} cosmic particles with size ${particleSize}`);
+      } else {
+        console.log("No particles to create (amount set to 0)");
+      }
+    }
+    
+    // Animate particles
+    function animateParticles() {
+      try {
+        // Cancel any existing animation frame to prevent duplicates
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+        
+        if (isDrawing) {
+          animationId = requestAnimationFrame(animateParticles);
+          return;
+        }
+        
+        isDrawing = true;
+        
+        // Clear the canvas completely
+        particlesCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+        
+        // Only draw particles if there should be some and user has uploaded an image
+        if (particleAmount > 0) {
+          // Make sure we have the right number of particles
+          if (particles.length !== particleAmount) {
+            initParticles();
+          }
+          
+          // Only process and draw a subset of particles per frame if there are too many
+          // This helps with performance when many particles are being shown
+          const batchSize = Math.min(particles.length, 75); // Limit processing to 75 particles at once
+          const startIndex = Math.floor(Math.random() * Math.max(1, particles.length - batchSize));
+          const endIndex = startIndex + batchSize;
+          
+          // Draw and update each particle in the batch
+          for (let i = 0; i < particles.length; i++) {
+            // Always update all particles
+            particles[i].update();
+            
+            // Only draw particles in the current batch or if particle count is small
+            if (particles.length <= 75 || (i >= startIndex && i < endIndex)) {
+              particles[i].draw();
+            }
+          }
+          
+          // Draw cosmic connections between particles (only for visible particles)
+          if (particles.length <= 75) {
+            drawCosmicConnections();
+          } else {
+            drawCosmicConnections(startIndex, endIndex);
+          }
+        }
+        
+        isDrawing = false;
+        // Store the animation ID so we can cancel it if needed
+        animationId = requestAnimationFrame(animateParticles);
+      } catch (error) {
+        console.error('Error in animateParticles:', error);
+        isDrawing = false;
+        // Try to recover animation
+        animationId = requestAnimationFrame(animateParticles);
+      }
+    }
+    
+    function drawCosmicConnections(startIdx = 0, endIdx = particles.length) {
+      try {
+        // Limit the range to prevent out-of-bounds errors
+        startIdx = Math.max(0, Math.min(startIdx, particles.length - 1));
+        endIdx = Math.max(startIdx + 1, Math.min(endIdx, particles.length));
+        
+        const maxDistance = 80; // Reduced from 100 for performance
+        
+        for (let a = startIdx; a < endIdx; a++) {
+          // Limit connections per particle for performance
+          const connectionLimit = 5;
+          let connections = 0;
+          
+          for (let b = a + 1; b < endIdx && connections < connectionLimit; b++) {
+            const dx = particles[a].x - particles[b].x;
+            const dy = particles[a].y - particles[b].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < maxDistance) {
+              connections++;
+              
+              // Calculate opacity based on distance
+              const opacity = Math.max(0, Math.min(0.6, (1 - distance / maxDistance) * 0.6));
+              
+              if (opacity <= 0) continue; // Skip if invisible
+              
+              // Create gradient between the two particles
+              const gradient = particlesCtx.createLinearGradient(
+                particles[a].x, particles[a].y, 
+                particles[b].x, particles[b].y
+              );
+              
+              gradient.addColorStop(0, `rgba(${particles[a].r}, ${particles[a].g}, ${particles[a].b}, ${opacity})`);
+              gradient.addColorStop(1, `rgba(${particles[b].r}, ${particles[b].g}, ${particles[b].b}, ${opacity})`);
+              
+              // Draw the connection
+              particlesCtx.beginPath();
+              particlesCtx.strokeStyle = gradient;
+              particlesCtx.lineWidth = Math.min(1, opacity * 2);
+              particlesCtx.moveTo(particles[a].x, particles[a].y);
+              particlesCtx.lineTo(particles[b].x, particles[b].y);
+              particlesCtx.stroke();
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error drawing connections:', error);
+      }
+    }
+    
+    // Update when controls change with error handling
+    function updateBorderSettings() {
+      try {
+        // Only update if there's a valid value
+        const value = parseInt(borderThicknessInput.value);
+        if (!isNaN(value) && value > 0) {
+          if (userImage) {
+            drawImage();
+          } else {
+            initCanvas();
+          }
+        }
+      } catch (error) {
+        console.error('Error updating border:', error);
+      }
+    }
+    
+    borderThicknessInput.addEventListener('input', updateBorderSettings);
+    borderGlowInput.addEventListener('input', updateBorderSettings);
+    
+    colorStartInput.addEventListener('input', function() {
+      try {
+        updateBorderSettings();
+        // Only recreate particles if a valid color is chosen
+        if (this.value && this.value.match(/^#[0-9A-F]{6}$/i)) {
+          initParticles();
+        }
+      } catch (error) {
+        console.error('Error updating color:', error);
+      }
+    });
+    
+    colorEndInput.addEventListener('input', function() {
+      try {
+        updateBorderSettings();
+        if (this.value && this.value.match(/^#[0-9A-F]{6}$/i)) {
+          initParticles();
+        }
+      } catch (error) {
+        console.error('Error updating color:', error);
+      }
+    });
+    
+    colorAccentInput.addEventListener('input', function() {
+      try {
+        updateBorderSettings();
+        if (this.value && this.value.match(/^#[0-9A-F]{6}$/i)) {
+          initParticles();
+        }
+      } catch (error) {
+        console.error('Error updating color:', error);
+      }
+    });
+    
+    particleAmountInput.addEventListener('input', function() {
+      try {
+        const value = parseInt(this.value);
+        if (!isNaN(value) && value >= 0) {
+          particleAmount = value;
+          initParticles();
+        }
+      } catch (error) {
+        console.error('Error updating particle amount:', error);
+      }
+    });
+    
+    particleSizeInput.addEventListener('input', function() {
+      try {
+        const value = parseInt(this.value);
+        if (!isNaN(value) && value > 0) {
+          particleSize = value;
+          initParticles();
+        }
+      } catch (error) {
+        console.error('Error updating particle size:', error);
+      }
+    });
+    
+    particleSpeedInput.addEventListener('input', function() {
+      try {
+        const value = parseInt(this.value);
+        if (!isNaN(value) && value > 0) {
+          particleSpeed = value / 5;
+          initParticles();
+        }
+      } catch (error) {
+        console.error('Error updating particle speed:', error);
+      }
+    });
+    
+    // Download button
+    downloadButton.addEventListener('click', function() {
+      if (!userImage) return;
+      
+      try {
+        // Create a temporary canvas to combine the avatar and particles
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = avatarCanvas.width;
+        tempCanvas.height = avatarCanvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        // Clear the temporary canvas
+        tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+        
+        // Draw the avatar canvas
+        tempCtx.drawImage(avatarCanvas, 0, 0);
+        
+        // Draw the particles canvas
+        tempCtx.drawImage(particlesCanvas, 0, 0);
+        
+        // Try using toBlob (more reliable in some browsers)
+        if (tempCanvas.toBlob) {
+          tempCanvas.toBlob(function(blob) {
+            // Create object URL from blob
+            const url = URL.createObjectURL(blob);
+            
+            // Create download link
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = 'cosmic-avatar.png';
+            
+            // Append to body (required for Firefox)
+            document.body.appendChild(downloadLink);
+            
+            // Trigger click
+            downloadLink.click();
+            
+            // Clean up
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+          }, 'image/png');
+        } else {
+          // Fallback to toDataURL if toBlob is not available
+          const dataURL = tempCanvas.toDataURL('image/png');
+          
+          const downloadLink = document.createElement('a');
+          downloadLink.href = dataURL;
+          downloadLink.download = 'cosmic-avatar.png';
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+        }
+      } catch (error) {
+        console.error('Download error:', error);
+        alert('There was an error downloading your cosmic avatar. Please try again or try a different browser.');
+      }
+    });
+    
+    // Initialize everything
+    function init() {
+      // Setup canvases
+      resizeCanvas();
+      
+      // Setup particles
+      initParticles();
+      
+      // Start animation
+      animateParticles();
+    }
+    
+    // Handle window resize
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>
